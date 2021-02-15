@@ -3,11 +3,11 @@ An anki addon for 2.1 for comparing notes for duplicates.
 
 ## What to use Note Comparer for?
 ![Main window](/screenshots/main.jpg)
-The purpose of the addon is to compare notes for duplicates. You can group notes based on their deck, note type or tag(s). You can then compare notes between the groups by specifying fields that need to match or by entering manual conditions yourself. Notes with either matching fields or fulfilling the conditions are seen as duplicates and you can then perform separate actions on them such as delete, (un)suspend and tagging.
+<br>The purpose of the addon is to compare notes for duplicates. You can group notes based on their deck, note type or tag(s). You can then compare notes between the groups by specifying fields that need to match or by entering manual conditions yourself. Notes with either matching fields or fulfilling the conditions are seen as duplicates and you can then perform separate actions on them such as delete, (un)suspend and tagging.
 
 ## Manual conditions
 ![Advanced mode](/screenshots/advanced.jpg)
-When enabling 'Advanced mode', you can manually specificy conditions which determine whether notes from different groups are seen as duplicates.
+<br>When enabling 'Advanced mode', you can manually specificy conditions which determine whether notes from different groups are seen as duplicates.
 To that end, you have to specify which (parts of) fields much match in order for the notes to be seen as duplicates (field values = fields, in this context):
 <ul style='list-style-position: inside'>
   <li>
@@ -44,8 +44,8 @@ To that end, you have to specify which (parts of) fields much match in order for
   </li>
 </ul>
 
-## Regular expression capture and condiions
-![Regex capture](/screenshots/regex.jpg)
+## Regular expression capture and conditions
+![Regex capture](/screenshots/regex.jpg)<br>
 <p>If 'RegEx capture' has been enabled, you will be able to specify part(s) for each field instead of the whole field 
 by entering a regular expression in the 'RegEx' boxes and capturing certain parts in parenthesis.
 Any captured group of a field can then be referenced in the conditions box (see the point above) as '<code>GxFyRz</code>' where '<code>z</code>' is the captured group number.
