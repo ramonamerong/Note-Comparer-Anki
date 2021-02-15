@@ -45,7 +45,7 @@ To that end, you have to specify which (parts of) fields much match in order for
 </ul>
 
 ## Regular expression capture and conditions
-![Regex capture](/screenshots/regex.jpg)<br>
+![Regex capture](/screenshots/regex.jpg)
 <p>If 'RegEx capture' has been enabled, you will be able to specify part(s) for each field instead of the whole field 
 by entering a regular expression in the 'RegEx' boxes and capturing certain parts in parenthesis.
 Any captured group of a field can then be referenced in the conditions box (see the point above) as '<code>GxFyRz</code>' where '<code>z</code>' is the captured group number.
@@ -57,7 +57,7 @@ When used in conjuction with the '<code>=</code>' or '<code>in</code>' operators
 <br><b>Example 2</b>: '<code>/\d/ in G1F1 or G1F2 = /\w/</code>' means that there must be at least a single digit in field 1 or field 2 must be exactly one letter.</p>
 
 ## Actions
-![Actions](/screenshots/action.jpg)
+![Actions](/screenshots/action.jpg)<br>
 After comparison you can also change the actions you want to perform on each note separately.
 
 ## Contact
