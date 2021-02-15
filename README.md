@@ -45,7 +45,7 @@ To that end, you have to specify which (parts of) fields much match in order for
 </ul>
 
 ## Regular expression capture and conditions
-![Regex capture](/screenshots/regex.jpg)<br>
+![Regex capture](/screenshots/regex.jpg)
 <p>If 'RegEx capture' has been enabled, you will be able to specify part(s) for each field instead of the whole field 
 by entering a regular expression in the 'RegEx' boxes and capturing certain parts in parenthesis.
 Any captured group of a field can then be referenced in the conditions box (see the point above) as '<code>GxFyRz</code>' where '<code>z</code>' is the captured group number.
