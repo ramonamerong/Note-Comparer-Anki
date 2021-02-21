@@ -3,9 +3,6 @@ An anki addon for 2.1 for comparing notes for duplicates.
 
 ## What to use Note Comparer for?
 ![Main window](/screenshots/main.jpg)
-
-
-
 <br>The purpose of the addon is to compare notes for duplicates. You can group notes based on their deck, note type or tag(s). You can then compare notes between the groups by specifying fields that need to match or by entering manual conditions yourself. Notes with either matching fields or fulfilling the conditions are seen as duplicates and you can then perform separate actions on them such as delete, (un)suspend and tagging.
 
 ## Important to know
