@@ -28,6 +28,7 @@ class QueueDialog(QDialog):
         self.maxRows = 1000
 
         #Create a layout
+        self.setWindowTitle("Action Queue")
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
 

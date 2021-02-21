@@ -26,7 +26,7 @@ def main():
 
 
 #Create a new menu item
-action = QAction("Compare notes", mw)
+action = QAction("Note Comparer", mw)
 #Set it to call the main function when it's clicked
 action.triggered.connect(main)
 #And add it to the tools menu

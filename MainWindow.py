@@ -26,6 +26,7 @@ class Dialog(QDialog):
         super().__init__(*args, **kwargs)
 
         #Setup the dialog window and vertical layout
+        self.setWindowTitle("Note Comparer")
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
 
@@ -34,7 +35,8 @@ class Dialog(QDialog):
             'With this add-on you can group notes by a number of ways such as a deck, note type and even multiple tags.\
             \nNotes in different groups can then be marked as duplicates depending on the fields that are selected and an action can be performed on them.\
             \nBy default, notes in different groups are marked as duplicates when their fields with the same number matches.\
-            \nYou can disable this and specificy your own conditions for duplicate notes if you enable \'advanced mode\' below.')
+            \nYou can disable this and specificy your own conditions for duplicate notes if you enable \'advanced mode\' below.\
+			\nHover over \'advanced options\' or \'RegEx capture\' for more explanation.')
         self.intro.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.intro)
 
