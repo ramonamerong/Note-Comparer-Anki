@@ -60,5 +60,11 @@ When used in conjuction with the '<code>=</code>' or '<code>in</code>' operators
 ![Actions](/screenshots/action.jpg)<br>
 After comparison you can also change the actions you want to perform on each note separately.
 
+## Future additions
+<ul>
+  <li>Create a replace action where the replace word is either a word or field/regex reference (<code>GxFyRz</code>)</li>
+  <li>Select notes from the browser to be grouped.</li>
+</ul>
+
 ## Contact
-For suggestions or bugs you can either make a issue here on github or contact me directly on discord as Ramanel#0650
+For (future) suggestions or bugs you can either make a issue here on github or contact me directly on discord as Ramanel#0650
