@@ -50,7 +50,7 @@ class Comparer(QObject):
     def createFieldInfo(self):
         
         #Retrieve the note types (models) and their card types (templates) from the database
-        fieldInfo = {'Deck': {}, 'Note type': {}, 'Tags': {}}
+        self.fieldInfo = {'Deck': {}, 'Note type': {}, 'Tags': {}}
         self.noteTypeIndex = {}
         for model in mw.col.models.all():
 
@@ -71,11 +71,11 @@ class Comparer(QObject):
                     'noteType': noteTypeInfo
                 })
             
-            fieldInfo['Note type'][model['name']] = noteTypeInfo
+            self.fieldInfo['Note type'][model['name']] = noteTypeInfo
 
             # #For every note add all of the card types
             # for cardType in model['tmpls']:
-            #     fieldInfo['Card type'][cardType['name']] = {
+            #     self.fieldInfo['Card type'][cardType['name']] = {
             #         'fields': fields,
             #         'noteType': noteTypeInfo
             #     }
@@ -84,34 +84,66 @@ class Comparer(QObject):
         #Also create a deck index (id -> name)
         self.deckIndex = {}
         for deck in mw.col.decks.all():
-            fieldInfo['Deck'][deck['name']] = {
+            self.fieldInfo['Deck'][deck['name']] = {
                 'id': deck['id'],
                 'fields': [],
                 'noteTypes': {},
-                'noteIDs': []
+                'noteIDs': [],
+                'children': mw.col.decks.children(deck['id'])
             }
             self.deckIndex[deck['id']] = deck['name']
 
-        #Then loop over all of the cards to determine which notes occur in the decks
+        #Then loop over all of the cards to determine which note types occur in the decks
         for row in mw.col.db.execute('select cards.did, notes.mid from cards left join notes on cards.nid = notes.id'):
             did = row[0]
             mid = row[1]
             deckName = self.deckIndex[did]
             noteTypeName = self.noteTypeIndex[mid]
-            deck = fieldInfo['Deck'][deckName]
+            deck = self.fieldInfo['Deck'][deckName]
             noteType = {}
 
             #Only add the note type and fields if it does not already exist
             if noteTypeName not in deck['noteTypes']:
-                noteType = fieldInfo['Note type'][noteTypeName]
+                noteType = self.fieldInfo['Note type'][noteTypeName]
                 deck['noteTypes'][noteTypeName] = noteType
                 deck['fields'].extend(noteType['fields'])
         
+        #Since parent decks can have cards associated with them, recursively look for children of any
+        #deck and add any not present note types to that deck
+        for deckName in self.fieldInfo['Deck'].keys():
+            self.fillParentDecks(deckName)
+
         #Loop over all of the tags to add them to the fieldInfo but don't add any fields yet
         for tag in mw.col.tags.all():
-            fieldInfo['Tags'][tag] = {'fields': [], 'noteIDs': []}
+            self.fieldInfo['Tags'][tag] = {'fields': [], 'noteIDs': []}
 
-        self.fieldInfo = fieldInfo
+
+    #Recursive method to fill any parent decks with their children's
+    def fillParentDecks(self, deckName):
+        
+        #Retrieve the current deck and it's already existing note types
+        d = self.fieldInfo['Deck'][deckName]
+        noteTypes = d['noteTypes'].copy()
+
+        #Base case: An deck without children
+        if len(d['children']) == 0:
+            return d['noteTypes']
+
+        #Loop over all children to collect all of the note types present
+        for cName, cID in d['children']:
+            noteTypes = {**noteTypes, **self.fillParentDecks(cName)}
+
+        #Loop over all the retrieved note types
+        #and add the fields of any note type not already contained
+        for name, noteType in noteTypes.items():
+            if name not in d['noteTypes']:
+                d['fields'].extend(noteType['fields'])
+
+        #Assign the retrieved note types to the deck's noteTypes propery
+        d['noteTypes'] = noteTypes
+
+        #Return the note types
+        return noteTypes
 
     #Method to add group to the comparer
     def addGroup(self):
@@ -119,7 +151,7 @@ class Comparer(QObject):
         return len(self.groups) - 1
 
     #Method to load note ids into the currently selected fields.
-    #Must be carried out before the function below
+    #Must be carried out before the method 'run'
     def getNoteIDs(self):
         
         #Retrieve all of the note IDs per group and assign them

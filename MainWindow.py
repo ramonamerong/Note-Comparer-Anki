@@ -36,7 +36,7 @@ class Dialog(QDialog):
             \nNotes in different groups can then be marked as duplicates depending on the fields that are selected and an action can be performed on them.\
             \nBy default, notes in different groups are marked as duplicates when their fields with the same number matches.\
             \nYou can disable this and specificy your own conditions for duplicate notes if you enable \'advanced mode\' below.\
-			\nHover over \'advanced options\' or \'RegEx capture\' for more explanation.')
+			\nHover over \'advanced mode\' or \'RegEx capture\' for more explanation.')
         self.intro.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.intro)
 
