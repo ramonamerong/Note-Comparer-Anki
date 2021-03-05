@@ -94,8 +94,8 @@ class Node:
                 raise re.error(f'"{string}" is not a valid condition.')
 
             #Retrieve the types of the operands
-            leftType, self.leftValue = self.operandType(stringSplit[0])
-            rightType, self.rightValue = self.operandType(stringSplit[2])
+            leftType, self.leftValue = self.__class__.operandType(stringSplit[0])
+            rightType, self.rightValue = self.__class__.operandType(stringSplit[2])
 
             #Depending on the operator different solve methods are saved 
             #while stripping any special characters (' for string values or / for regular expressions)
@@ -141,7 +141,8 @@ class Node:
 
     #Method to check the end child element's operand and return it
     #If no type can be found, raise an error
-    def operandType(self, operand):
+    @staticmethod
+    def operandType(operand):
 
         operand = operand.strip()
         fieldMatch = re.fullmatch(r'G(\d+)F(\d+)R?(\d+)?', operand)
@@ -204,7 +205,8 @@ class Node:
             return totalCondition
 
     #Method to retrieve a field value from a set of notes
-    def getFieldValue(self, notes, fieldReference):
+    @staticmethod
+    def getFieldValue(notes, fieldReference):
 
         #When the field reference is not a field reference, return it
         if not isinstance(fieldReference, tuple):
@@ -237,8 +239,8 @@ class Node:
     def equalCompare(self, notes):
         
         #When either or both of the values are field references, retrieve them from the notes
-        left = self.getFieldValue(notes, self.leftValue)
-        right = self.getFieldValue(notes, self.rightValue)
+        left = self.__class__.getFieldValue(notes, self.leftValue)
+        right = self.__class__.getFieldValue(notes, self.rightValue)
 
         #Return the comparison
         if isinstance(left, bool) or isinstance(right, bool):
@@ -249,8 +251,8 @@ class Node:
     def inCompare(self, notes):
 
         #When either or both of the values are field references, retrieve them from the notes
-        left = self.getFieldValue(notes, self.leftValue)
-        right = self.getFieldValue(notes, self.rightValue)
+        left = self.__class__.getFieldValue(notes, self.leftValue)
+        right = self.__class__.getFieldValue(notes, self.rightValue)
 
         #Return the comparison
         if isinstance(left, bool) or isinstance(right, bool):
@@ -261,8 +263,8 @@ class Node:
     def insideCompare(self, notes):
 
         #When either or both of the values are field references, retrieve them from the notes
-        left = self.getFieldValue(notes, self.leftValue)
-        right = self.getFieldValue(notes, self.rightValue)
+        left = self.__class__.getFieldValue(notes, self.leftValue)
+        right = self.__class__.getFieldValue(notes, self.rightValue)
 
         #Return the comparison
         if isinstance(left, bool) or isinstance(right, bool):
@@ -273,7 +275,7 @@ class Node:
     def equalRegexCompare(self, notes):
 
         #When the left value is a field reference return it from the notes
-        left = self.getFieldValue(notes, self.leftValue)
+        left = self.__class__.getFieldValue(notes, self.leftValue)
 
         #Return the comparison
         if isinstance(left, bool):
@@ -284,7 +286,7 @@ class Node:
     def inRegexCompare(self, notes):
 
         #When the right value is a field reference return it from the notes
-        right = self.getFieldValue(notes, self.rightValue)
+        right = self.__class__.getFieldValue(notes, self.rightValue)
 
         #Return the comparison
         if isinstance(right, bool):

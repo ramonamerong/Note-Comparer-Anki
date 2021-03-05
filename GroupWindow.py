@@ -73,6 +73,17 @@ class GroupWindowLayout(QVBoxLayout):
         self.addWidget(self.tagBox)
         self.tagBox.textChanged.connect(self.enterTag)
 
+        #Add widget to enter a replacement for the duplicate action
+        self.replaceBox = QLineEdit(parent)
+        self.replaceBox.setPlaceholderText('Enter a replacement for the first field (hover for more info).')
+        self.replaceBox.setToolTip('''The replacement for the first selected field\
+        can either be normal text or a reference to a field value.\
+        This is of the form '<code>GxFy(Rz)</code>', where '<code>x</code>' is the group,\
+        '<code>y</code>' the field and '<code>z</code>' the optional captured group (without parentheses).\
+        <br>(Please hover over 'Advanced mode' and 'Regex capture' for more information).''')
+        self.addWidget(self.replaceBox)
+        self.replaceBox.textChanged.connect(self.enterReplacement)
+
         #Add a table widget to display the fields
         self.fieldTableLabel = QLabel('Choose the fields to compare with.', parent)
         self.addWidget(self.fieldTableLabel)
@@ -143,7 +154,7 @@ class GroupWindowLayout(QVBoxLayout):
         self.selectGroupName(tagString)
         
     #Method trigger to update the duplicate action
-    #If the last option (tag) is selected, unhide the field where tags can be entered
+    #If the option 'Tag with...' or 'Replace with...' is selected, unhide the field where the tag / replacement can be entered
     def selectDuplicateAction(self, selectedText):
         if selectedText != self.group.duplicateAction and self.triggers:
             
@@ -154,10 +165,17 @@ class GroupWindowLayout(QVBoxLayout):
             #When it is 'Tag with...' show a field to enter a tag
             if selectedText == 'Tag with...':
                 self.tagBox.setVisible(True)
-            #When it is not, hide a field to enter a tag
-            else:
+                self.replaceBox.setVisible(False)
+
+            #When it is 'Replace with...' show a field to enter a replacement
+            elif selectedText == 'Replace with...':
+                self.replaceBox.setVisible(True)
                 self.tagBox.setVisible(False)
 
+            #When it is not, hide the above fields to enter a tag/replacement
+            else:
+                self.tagBox.setVisible(False)
+                self.replaceBox.setVisible(False)
 
             self.triggers = True
 
@@ -167,6 +185,14 @@ class GroupWindowLayout(QVBoxLayout):
         if tag != self.group.duplicateActionTag and self.triggers:
             self.triggers = False
             self.group.duplicateActionTag = tag
+            self.triggers = True
+
+    #Method trigger to update entered replacement for the duplicate action
+    def enterReplacement(self, replacement):
+
+        if replacement != self.group.duplicateActionReplacement and self.triggers:
+            self.triggers = False
+            self.group.setduplicateActionReplacement(replacement)
             self.triggers = True
 
     #Method to enable / disable all of the GUI elements

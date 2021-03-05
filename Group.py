@@ -1,6 +1,7 @@
 
 #Import basic modules
 import os
+import re
 
 #Import the main window object (mw) from aqt
 from aqt import mw
@@ -13,7 +14,10 @@ from aqt.qt import *
 
 #Import local .py modules
 from . import Utils
+from . import Node
+
 echo = Utils.echo
+Node = Node.Node
 
 #Class to instantiate a Group object to represent one group of cards to be used in a Comparer object
 #An fieldinfo object is required (create with the static method Comparer::createFieldInfo)
@@ -27,6 +31,8 @@ class Group:
         self.name = ''
         self.duplicateAction = ''
         self.duplicateActionTag = ''
+        self.duplicateActionReplacement = ''
+        self.replaceFieldReference = None
         self.fields = []
 
     #Method to return the currently selected note group field info
@@ -110,3 +116,21 @@ class Group:
         tagsGroup['noteIDs'].extend(noteIDs)
 
         return tagString
+
+    #Method to save a replacement action
+    def setduplicateActionReplacement(self, replacement):
+
+        #Save the duplicateAction replacement
+        self.duplicateActionReplacement = replacement
+
+        #When it is a field reference, break it up, save it and return
+        try:
+            operandType = Node.operandType(replacement)
+            if operandType[0] == 'field':
+                self.replaceFieldReference = operandType[1]
+                return
+
+        #Otherwise set it to None
+        except re.error:
+            pass
+        self.replaceFieldReference = None

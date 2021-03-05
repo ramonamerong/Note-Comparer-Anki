@@ -37,7 +37,7 @@ class Comparer(QObject):
         self.groups = []
         self.advancedMode = False
         self.regexCapture = False
-        self.actions = ['Nothing', 'Delete', 'Suspend', 'Unsuspend', 'Tag with...']
+        self.actions = ['Nothing', 'Delete', 'Suspend', 'Unsuspend', 'Tag with...', 'Replace with...']
         self.conditionTree = Node('')
         self.conditionString = ''
         self.queue = []
@@ -183,7 +183,8 @@ class Comparer(QObject):
     def getNoteDict(self, note, groupIndex):
 
         #Retrieve the note
-        note = {'id': note.id, 'noteTypeID': note.mid, 'fields': dict(note.items()), 'tags': note.tags, 'compareFields': []}
+        note = {'id': note.id, 'noteTypeID': note.mid, 'fields': dict(note.items()), 
+        'tags': note.tags, 'compareFields': [], 'replacement': '', 'tag': ''}
 
         #Retrieve all the compare fields to be set
         compareFields = self.groups[groupIndex].fields
@@ -203,7 +204,7 @@ class Comparer(QObject):
                 'name': fieldName,
                 'value': fieldValue.strip() if isinstance(fieldValue, str) else fieldValue,
                 'noteTypeID': fieldNoteTypeID,
-                'groups': None
+                'groups': None,
             }
 
             #When regex capture is enabled, try to save the matched groups
@@ -286,8 +287,9 @@ class Comparer(QObject):
                 for i in range(self.groupNum):
                     notes.append(noteGroups[i][noteIndices[i]])
 
-                #Check for duplicates for these notes, if present, add them to the queue
+                #Check for duplicates for these notes, if present, add a replacement if the field is set and add them to the queue
                 if self.checkDuplicate(notes):
+                    self.addReplacement(notes)
                     self.queue.append(notes)
 
                 #Emit the progress signal every 1 seconds
@@ -358,6 +360,26 @@ class Comparer(QObject):
 
         return duplicatePresent
 
+    #Method to add the tag / replacement of the group to the notes
+    def addReplacement(self, notes):
+        for groupIndex in range(len(notes)):
+
+            #Save the tag
+            group = self.groups[groupIndex]
+            note = notes[groupIndex]
+            note['tag'] = group.duplicateActionTag
+
+            #When the field reference is 'None' and a replacement is set
+            #it is just a string so save it into the note
+            if group.replaceFieldReference == None and group.duplicateActionReplacement != '':
+                note['replacement'] = group.duplicateActionReplacement
+            
+            #Otherwise try to retrieve the field value from the other notes and save it if it is valid
+            else:
+                replacement = Node.getFieldValue(notes, group.replaceFieldReference)
+                if replacement != False:
+                    note['replacement'] = replacement
+
     #Method to perform the set actions on the cards in the queue
     def performActions(self, maxRows):
 
@@ -369,25 +391,37 @@ class Comparer(QObject):
 
                 #Try to retrieve the note, when it is not found, skip it
                 try:
-                    note = mw.col.getNote(note['id'])
+                    noteObject = mw.col.getNote(note['id'])
                 except:
                     continue
 
                 #Perform the appropiate action
                 if action == 'Delete':
-                    mw.col.remNotes([note.id])
+                    mw.col.remNotes([noteObject.id])
                 elif action == 'Suspend':
-                    for card in note.cards():
+                    for card in noteObject.cards():
                         card.queue = -1
                         card.flush()
                 elif action == 'Unsuspend':
-                    for card in note.cards():
+                    for card in noteObject.cards():
                         card.queue = 0
                         card.flush()
                 elif action == 'Tag with...':
-                    tag = self.groups[groupIndex].duplicateActionTag
-                    note.addTag(tag)
-                    note.flush()
+                    #tag = self.groups[groupIndex].duplicateActionTag
+                    tag = note['tag']
+                    echo(tag)
+                    if tag != '':
+                        noteObject.addTag(tag)
+                        noteObject.flush()
+                elif action == 'Replace with...':
+
+                    #Only save the replacement when the replacement is not an empty string
+                    #and the compare field value is not 'False'
+                    #since it is otherwise not a field that is present in the note
+                    firstField = note['compareFields'][0]
+                    if firstField['value'] != False and note['replacement'] != '':
+                        noteObject[firstField['name']] = note['replacement']
+                        noteObject.flush()
 
             #When the number of rows exceeds the max
             #replace the current queue for the remaining items
