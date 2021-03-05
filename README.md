@@ -63,6 +63,13 @@ I can then reference the day, month and year using '<code>G1F1R1</code>', '<code
 When used in conjuction with the '<code>=</code>' or '<code>in</code>' operators the other field has to match the regular expression either entirely or partly respectively.
 <br><b>Example 2</b>: '<code>/\d/ in G1F1 or G1F2 = /\w/</code>' means that there must be at least a single digit in field 1 or field 2 must be exactly one letter.</p>
 
+## Replace Action
+<p>When the 'Replace with...' action is selected, you can enter a replacement for the first selected field
+of any notes in that group. The replacement for the first selected field can either be normal text or a reference to a field value.
+This is of the form '<code>GxFy(Rz)</code>', where '<code>x</code>' is the group,
+'<code>y</code>' the field and '<code>z</code>' the optional captured group (without parentheses).
+<br>(Please see the points above about 'Manual conditions' and 'Regular expressions' for more information on how to construct a reference to a field value).</p>
+
 ## Actions
 ![Actions](/screenshots/action.jpg)<br>
 After comparison you can also change the actions you want to perform on each note separately.
