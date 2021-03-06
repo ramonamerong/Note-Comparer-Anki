@@ -29,6 +29,7 @@ class Group:
         self.fieldInfo = Comparer.fieldInfo
         self.type = ''
         self.name = ''
+        self.actions = ['Nothing', 'Delete', 'Suspend', 'Unsuspend', 'Tag with...']
         self.duplicateAction = ''
         self.duplicateActionTag = ''
         self.duplicateActionReplacement = ''
@@ -90,18 +91,33 @@ class Group:
         tags.sort()
         tagString = ' '.join(tags)
         
-        #If the current group of tags doesn't exist yet in the 'Tags' dictionary create it
-        if tagString not in self.fieldInfo['Tags']:
-            self.fieldInfo['Tags'][tagString] = {'fields': [], 'noteIDs': []}
-        #Else if the fields array is not empty don't continue
-        elif len(self.fieldInfo['Tags'][tagString]['fields']) > 0:
-            return
-        
         #Retrieve all of the ids of the notes
         noteIDs = mw.col.find_notes(' and '.join([f'tag:{t}' for t in tags ]))
 
+        self.createFields(noteIDs, 'Tags', tagString)
+
+        return tagString
+
+    #Method to add fields of the notes selected in the browser to the 'Browser' dictionary
+    def createGroupBrowserFields(self, noteIDs):
+        numSelections = len(self.fieldInfo['Browser'])
+        selectionString = f'Selection {numSelections + 1}'
+        self.createFields(noteIDs, 'Browser', selectionString)
+
+        return selectionString
+
+    #Method to add fields into the fieldInfo depending on the given group type and name
+    def createFields(self, noteIDs, groupType, groupName):
+        echo(len(noteIDs))
+        #If the current group name doesn't exist yet in the group type dictionary create it
+        if groupName not in self.fieldInfo[groupType]:
+            self.fieldInfo[groupType][groupName] = {'fields': [], 'noteIDs': []}
+        #Else if the fields array is not empty don't continue
+        elif len(self.fieldInfo[groupType][groupName]['fields']) > 0:
+            return
+
         #Loop over all of the notes to determine their note types and thus their fields.
-        tagsGroup = self.fieldInfo['Tags'][tagString]
+        group = self.fieldInfo[groupType][groupName]
         noteTypeFields = {}
         for noteID in noteIDs:
             note = mw.col.getNote(noteID)
@@ -112,10 +128,9 @@ class Group:
         #Then, add these fields to the fields array of the group of tags entry
         #and also add the note IDs to the tag group
         for fields in noteTypeFields.values():
-            tagsGroup['fields'].extend(fields)
-        tagsGroup['noteIDs'].extend(noteIDs)
+            group['fields'].extend(fields)
+        group['noteIDs'].extend(noteIDs)
 
-        return tagString
 
     #Method to save a replacement action
     def setduplicateActionReplacement(self, replacement):

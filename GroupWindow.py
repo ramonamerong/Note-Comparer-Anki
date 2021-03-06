@@ -2,8 +2,9 @@
 import os
 import re
 
-#Import the main window object (mw) from aqt
-from aqt import mw
+#Import the main window object (mw) and browser from aqt
+from aqt import mw, gui_hooks, dialogs
+from aqt.browser import Browser 
 
 #Import the "show info" tool from utils.py
 from aqt.utils import showInfo
@@ -30,21 +31,30 @@ class GroupWindowLayout(QVBoxLayout):
         self.groupIndex = Comparer.addGroup()
         self.group = Comparer.groups[self.groupIndex]
 
+        #Attach a hook to when the browser menus load
+        #to add an option to select notes
+        gui_hooks.browser_menus_did_init.append(self.addBrowserButton)
+
         #Create and add widgets to this layout group window
-        self.title = QLabel(f"<b>Group {self.groupIndex + 1}</b>", parent)
+        self.groupNum = self.groupIndex + 1
+        self.title = QLabel(f"<b>Group {self.groupNum} (G{self.groupNum})</b>", parent)
         self.title.setAlignment(Qt.AlignCenter)
         self.addWidget(self.title)
 
         #Add widget to select group type and link trigger method
-        self.groupTypeLabel = QLabel('Choose whether you want to group notes by deck, note type or tag(s).  ', parent)
+        self.groupTypeLabel = QLabel(f'''Choose whether you want to group notes by deck, note type or tag(s).\
+        \nAlternatively, you can choose 'Browser' to open up the browser,\
+        \nselect notes, right click and then choose\
+        \n\'Add selected notes to group {self.groupNum}\' to add them.''', parent)
         self.addWidget(self.groupTypeLabel)
         self.groupTypeBox = QComboBox(parent)
-        self.groupTypeBox.addItems(['Deck', 'Note type', 'Tags'])
+        self.groupTypeBox.addItems(['Deck', 'Note type', 'Tags', 'Browser'])
         self.groupTypeBox.currentTextChanged.connect(self.selectGroupType)
         self.addWidget(self.groupTypeBox)
 
         #Add widgets to select group name / tags
-        self.groupNameLabel = QLabel('Choose the exact deck, note type or tag(s) to group notes by.', parent)
+        self.groupNameLabel = QLabel('Choose the exact deck, note type, tag(s)\
+            \nor browser selection to group notes by.', parent)
         self.addWidget(self.groupNameLabel)
 
         self.groupNameBox = QComboBox(parent)
@@ -60,7 +70,7 @@ class GroupWindowLayout(QVBoxLayout):
         self.duplicateActionLabel = QLabel('Choose the default action for duplicate notes in a group.', parent)
         self.addWidget(self.duplicateActionLabel)
         self.duplicateActionBox = QComboBox(parent)
-        self.duplicateActionBox.addItems(Comparer.actions)
+        self.duplicateActionBox.addItems(self.group.actions)
         self.addWidget(self.duplicateActionBox)
         self.duplicateActionBox.currentTextChanged.connect(self.selectDuplicateAction)
 
@@ -75,8 +85,8 @@ class GroupWindowLayout(QVBoxLayout):
 
         #Add widget to enter a replacement for the duplicate action
         self.replaceBox = QLineEdit(parent)
-        self.replaceBox.setPlaceholderText('Enter a replacement for the first field (hover for more info).')
-        self.replaceBox.setToolTip('''The replacement for the first selected field\
+        self.replaceBox.setPlaceholderText('Enter a replacement for the selected field (Fx) (hover for more info).')
+        self.replaceBox.setToolTip('''The replacement for the selected field (<code>Fx</code>)\
         can either be normal text or a reference to a field value.\
         This is of the form '<code>GxFy(Rz)</code>', where '<code>x</code>' is the group,\
         '<code>y</code>' the field and '<code>z</code>' the optional captured group (without parentheses).\
@@ -90,17 +100,25 @@ class GroupWindowLayout(QVBoxLayout):
         self.fieldTable = FieldTable.FieldTable(self.group, parent)
         self.addWidget(self.fieldTable)
 
+        #Link methods to the field table to change the number of replace actions in the duplicate action box
+        #depending on whether a row was added or removed
+        self.fieldTable.rowAdded.connect(self.addReplaceAction)
+        self.fieldTable.rowRemoved.connect(self.removeReplaceAction)
+
         #Setup the default selection of the group type, name, fields and duplicate action
         self.selectGroupType('Deck')
         self.selectDuplicateAction(self.duplicateActionBox.currentText())
     
-    
+
     #Method trigger to update the group type and the groupName combobox
     def selectGroupType(self, selectedText):
-        
-        if selectedText != self.group.type and self.triggers:
+        if (selectedText != self.group.type or selectedText == 'Browser') and self.triggers:
             
             self.triggers = False
+
+            #When the selected text is 'Browser' open up the browser
+            if selectedText == 'Browser':
+                dialogs.open("Browser", mw)
 
             #When the selected text is not 'Tags', 
             #add the correct group names to the next box and hide the groupTagsBox and show the groupNameBox
@@ -152,7 +170,26 @@ class GroupWindowLayout(QVBoxLayout):
 
         #Select the tagString as a group name
         self.selectGroupName(tagString)
-        
+
+    #Method to add browser button when the browser is loaded
+    def addBrowserButton(self, Browser):
+        menu = Browser.form.menu_Cards
+        a = menu.addAction(f"Add selected notes to group {self.groupNum}")
+        a.triggered.connect(lambda: self.selectBrowserNotes(Browser))
+
+    #Method trigger to select browser notes
+    def selectBrowserNotes(self, Browser):
+        noteIDs = Browser.selectedNotes()
+        selectionString = self.group.createGroupBrowserFields(noteIDs)
+
+        #Select 'Browser' as the group type and the selection string as a group name
+        if self.group.type != 'Browser':
+            self.groupTypeBox.setCurrentText('Browser')
+        else:
+            self.selectGroupType('Browser')
+        self.groupNameBox.setCurrentText(selectionString)
+
+
     #Method trigger to update the duplicate action
     #If the option 'Tag with...' or 'Replace with...' is selected, unhide the field where the tag / replacement can be entered
     def selectDuplicateAction(self, selectedText):
@@ -167,8 +204,8 @@ class GroupWindowLayout(QVBoxLayout):
                 self.tagBox.setVisible(True)
                 self.replaceBox.setVisible(False)
 
-            #When it is 'Replace with...' show a field to enter a replacement
-            elif selectedText == 'Replace with...':
+            #When it starts with 'Replace' show a field to enter a replacement
+            elif selectedText.startswith('Replace'):
                 self.replaceBox.setVisible(True)
                 self.tagBox.setVisible(False)
 
@@ -194,6 +231,27 @@ class GroupWindowLayout(QVBoxLayout):
             self.triggers = False
             self.group.setduplicateActionReplacement(replacement)
             self.triggers = True
+
+    #Method trigger to update the replacement action
+    def addReplaceAction(self, rowIndex):
+
+        #When a new row is added, add a new replace action for that row
+        actionString = f'Replace F{rowIndex} with...'
+        numActions = self.duplicateActionBox.count()
+        self.duplicateActionBox.insertItem(numActions, actionString)
+
+        #And add it to the actions of the group object
+        self.group.actions.append(actionString)
+
+    #Method trigger to update the replacement action
+    def removeReplaceAction(self, rowCount):
+        
+        #Otherwise remove the last occuring replace action
+        numActions = self.duplicateActionBox.count()
+        self.duplicateActionBox.removeItem(numActions - 1)
+
+        #And remove the last row from the actions of the group object
+        self.group.actions.pop()
 
     #Method to enable / disable all of the GUI elements
     def setEnabledAll(self, boolean):

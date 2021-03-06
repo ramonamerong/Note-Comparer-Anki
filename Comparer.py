@@ -37,7 +37,6 @@ class Comparer(QObject):
         self.groups = []
         self.advancedMode = False
         self.regexCapture = False
-        self.actions = ['Nothing', 'Delete', 'Suspend', 'Unsuspend', 'Tag with...', 'Replace with...']
         self.conditionTree = Node('')
         self.conditionString = ''
         self.queue = []
@@ -50,7 +49,7 @@ class Comparer(QObject):
     def createFieldInfo(self):
         
         #Retrieve the note types (models) and their card types (templates) from the database
-        self.fieldInfo = {'Deck': {}, 'Note type': {}, 'Tags': {}}
+        self.fieldInfo = {'Deck': {}, 'Note type': {}, 'Tags': {}, 'Browser': {}}
         self.noteTypeIndex = {}
         for model in mw.col.models.all():
 
@@ -409,19 +408,23 @@ class Comparer(QObject):
                 elif action == 'Tag with...':
                     #tag = self.groups[groupIndex].duplicateActionTag
                     tag = note['tag']
-                    echo(tag)
                     if tag != '':
                         noteObject.addTag(tag)
                         noteObject.flush()
-                elif action == 'Replace with...':
+                elif action.startswith('Replace'):
 
-                    #Only save the replacement when the replacement is not an empty string
-                    #and the compare field value is not 'False'
-                    #since it is otherwise not a field that is present in the note
-                    firstField = note['compareFields'][0]
-                    if firstField['value'] != False and note['replacement'] != '':
-                        noteObject[firstField['name']] = note['replacement']
-                        noteObject.flush()
+                    #Retrieve the field number of the field in question
+                    match = re.search(r'F(\d+)', action)
+                    if match != None:
+                        fieldNum = int(match.group(1))
+
+                        #Only save the replacement when the replacement is not an empty string
+                        #and the compare field value is not 'False'
+                        #since it is otherwise not a field that is present in the note
+                        field = note['compareFields'][fieldNum - 1]
+                        if field['value'] != False and note['replacement'] != '':
+                            noteObject[field['name']] = note['replacement']
+                            noteObject.flush()
 
             #When the number of rows exceeds the max
             #replace the current queue for the remaining items

@@ -6,7 +6,7 @@ import os
 import re
 
 #Import the main window object (mw) from aqt
-from aqt import mw, dialogs
+from aqt import mw
 
 #Import the "show info" tool from utils.py
 from aqt.utils import showInfo
@@ -38,8 +38,8 @@ class QueueDialog(QDialog):
         #Add the intro explanation
         self.intro = QLabel('''Below are all of the duplicates found in the groups. You can select an action to perform on each note from the dropdown menu.
             If you want to change the action for all duplicates in a group at once, close this window, select the appropiate action from the dropdown menu        
-            and reopen this window by pressing 'show duplicates'. If you hover over a duplicate note you will be able to see all of it's fields.
-            Some notes are marked as duplicates multiple times and all of the set actions will therefore be performed upon it''', self)
+            and reopen this window by pressing 'show duplicates'. If you hover over a duplicate note you will be able to see all of its fields.
+            Some notes are marked as duplicates multiple times and all of the set actions will therefore be performed upon it.''', self)
         self.intro.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.intro)
         
@@ -51,8 +51,7 @@ class QueueDialog(QDialog):
         headers = []
         for i in range(self.Comparer.groupNum):
             headers.extend([f'Group {i+1}: Note fields', 'Action', 'Tag/Replacement'])
-            #endIndex = len(self.Comparer.actions) if self.Comparer.groups[i].duplicateAction == 'Tag with...' else len(self.Comparer.actions) - 1
-            actions.append(self.Comparer.actions)
+            actions.append(self.Comparer.groups[i].actions)
         self.queueTable.setHorizontalHeaderLabels(headers)
         self.layout.addWidget(self.queueTable)
 
@@ -84,17 +83,11 @@ class QueueDialog(QDialog):
             self.queueTable.horizontalHeader().setSectionResizeMode(0 + groupIndex*3, QHeaderView.Stretch)
             self.queueTable.horizontalHeader().setSectionResizeMode(1 + groupIndex*3, QHeaderView.Fixed)
             self.queueTable.horizontalHeader().setSectionResizeMode(2 + groupIndex*3, QHeaderView.Fixed)
-            self.queueTable.horizontalHeader().resizeSection(1 + groupIndex*3, 100)
-            self.queueTable.horizontalHeader().resizeSection(2 + groupIndex*3, 100)
+            self.queueTable.horizontalHeader().resizeSection(1 + groupIndex*3, 105)
+            self.queueTable.horizontalHeader().resizeSection(2 + groupIndex*3, 105)
 
         self.triggers = True
                 
-
-    # #Method to open note edit window
-    # def editNote(self, nID):
-    #     browser = dialogs.open("Browser", mw)
-    #     browser.form.searchEdit.lineEdit().setText("nid:{}".format(nID))
-    #     browser.onSearchActivated()
 
     #Method to add an widget to an table cell
     def addTableWidget(self, rowIndex, columnIndex, widget):
@@ -189,7 +182,7 @@ class QueueDialog(QDialog):
         #Update the text in the queue
         if action == 'Tag with...':
             self.updateText(rowIndex, groupIndex, textBox.text(), 'tag')
-        elif action == 'Replace with...':
+        elif action.startswith('Replace'):
             self.updateText(rowIndex, groupIndex, textBox.text(), 'replacement')
 
         self.triggers = True
@@ -205,7 +198,7 @@ class QueueDialog(QDialog):
         text = ''
         if action == 'Tag with...':
             text = note['tag']
-        elif action == 'Replace with...':
+        elif action.startswith('Replace'):
             text = note['replacement']
         textBox.setText(text)
 

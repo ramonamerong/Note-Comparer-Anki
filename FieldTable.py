@@ -19,6 +19,10 @@ from . import CustomQt
 #Class to instantiate a GroupWindow object
 class FieldTable(QTableWidget):
 
+    #Setup signals for when a row is added / removed
+    rowAdded = pyqtSignal(int)
+    rowRemoved = pyqtSignal(int)
+
     def __init__(self, group, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -75,7 +79,7 @@ class FieldTable(QTableWidget):
 
         self.triggers = True
 
-    #Method trigger to delete a when selecting the delete button of a row
+    #Method trigger to delete a row when selecting the delete button of a row
     def selectDelete(self, fieldRow):
 
         #If there is only one row left or it's the last row, don't delete it
@@ -109,6 +113,10 @@ class FieldTable(QTableWidget):
         currentRowCount = self.rowCount() or 0
         self.setRowCount(currentRowCount+1)
 
+        #Emit signal, except if it is the first row
+        if currentRowCount > 0:
+            self.rowAdded.emit(currentRowCount)
+
         #Create a combobox to be added to the table, add the row index to it,
         #disable the wheel event and link an lambda function to it
         fieldRow = QComboBox(self)
@@ -135,6 +143,10 @@ class FieldTable(QTableWidget):
         #Update all the regex line edit and delete button states
         self.updateRowStates()
 
+        #Add the vertical header item
+        item = QTableWidgetItem(f'F{currentRowCount+1}')
+        self.setVerticalHeaderItem(currentRowCount, item)
+
         #Update the fields of the row if necessary
         if update:
             self.updateFieldRow(currentRowCount)
@@ -159,12 +171,21 @@ class FieldTable(QTableWidget):
 
     #Method to remove the indicated row from the field table
     def remFieldRow(self, rowIndex):
+
+        #Emit signal
+        self.rowRemoved.emit(rowIndex)
+
+        #Remove the row
         self.group.removeFieldRow(rowIndex)
         self.removeRow(rowIndex)
         
         #Update all of the indices of the field rows in the table after the indiciated index
         for i in range(rowIndex, self.rowCount()):
             self.item(i, 0).widget.rowIndex -= 1
+
+        #Update the vertical header items following it
+        for i in range(rowIndex, self.rowCount()):
+            self.verticalHeaderItem(i).setText(f'F{i+1}')
 
         #Update the RegEx line edits and delete buttons 
         self.updateRowStates()
