@@ -3,7 +3,7 @@ An anki addon for 2.1 for comparing notes for duplicates.
 
 ## What to use Note Comparer for?
 ![Main window](/screenshots/main.jpg)
-<br>The purpose of the addon is to compare notes for duplicates. You can group notes based on their deck, note type or tag(s). You can then compare notes between the groups by specifying fields that need to match or by entering manual conditions yourself. Notes with either matching fields or fulfilling the conditions are seen as duplicates and you can then perform separate actions on them such as delete, (un)suspend and tagging.
+<br>The purpose of the addon is to compare notes for duplicates. You can group notes based on their deck, note type or tag(s) or select them from the browser (see the point 'Select notes from browser' below for more information). You can then compare notes between the groups by specifying fields that need to match or by entering manual conditions yourself. Notes with either matching fields or fulfilling the conditions are seen as duplicates and you can then perform separate actions on them such as delete, (un)suspend and tagging and replacing a field for another:
 
 ## Important to know
 <ul>
@@ -11,6 +11,9 @@ An anki addon for 2.1 for comparing notes for duplicates.
   <li>Please backup your notes/decks! When you make a mistake it could potentially alter/delete your notes!</li>
   <li>It can take a while to show a lot of duplicates after they have been found.</li>
 </ul>
+
+## Select notes from browser
+When choosing the option 'Browser' to group notes by, the browser opens up and you can then add notes to a group by selecting them, right clicking and choosing 'Add notes to group X'. This saves the current selection of notes as 'Selection X' and automatically selects it, but you can always select it later whenever 'Browser' is selected as the first option.
 
 ## Manual conditions
 ![Advanced mode](/screenshots/advanced.jpg)
