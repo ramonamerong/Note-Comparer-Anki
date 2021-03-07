@@ -79,8 +79,7 @@ After comparison you can also change the actions you want to perform on each not
 
 ## Future additions
 <ul>
-  <li>Create a replace action where the replace word is either a word or field/regex reference (<code>GxFyRz</code>)</li>
-  <li>Select notes from the browser to be grouped.</li>
+  <li>Add an action to transfer card statistics.</li>
 </ul>
 
 ## Contact
