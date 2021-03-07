@@ -94,6 +94,11 @@ class GroupWindowLayout(QVBoxLayout):
         self.addWidget(self.replaceBox)
         self.replaceBox.textChanged.connect(self.enterReplacement)
 
+        #Add widget to toggle cloze removal
+        self.clozeCheckBox = QCheckBox('Remove cloze markup from replacement.', parent)
+        self.addWidget(self.clozeCheckBox)
+        self.clozeCheckBox.stateChanged.connect(self.toggleCloze)
+
         #Add a table widget to display the fields
         self.fieldTableLabel = QLabel('Choose the fields to compare with.', parent)
         self.addWidget(self.fieldTableLabel)
@@ -203,16 +208,19 @@ class GroupWindowLayout(QVBoxLayout):
             if selectedText == 'Tag with...':
                 self.tagBox.setVisible(True)
                 self.replaceBox.setVisible(False)
+                self.clozeCheckBox.setVisible(False)
 
             #When it starts with 'Replace' show a field to enter a replacement
             elif selectedText.startswith('Replace'):
                 self.replaceBox.setVisible(True)
+                self.clozeCheckBox.setVisible(True)
                 self.tagBox.setVisible(False)
 
             #When it is not, hide the above fields to enter a tag/replacement
             else:
                 self.tagBox.setVisible(False)
                 self.replaceBox.setVisible(False)
+                self.clozeCheckBox.setVisible(False)
 
             self.triggers = True
 
@@ -252,6 +260,10 @@ class GroupWindowLayout(QVBoxLayout):
 
         #And remove the last row from the actions of the group object
         self.group.actions.pop()
+
+    #Method trigger to toggle cloze removal from the replacement
+    def toggleCloze(self):
+        self.group.removeCloze = self.clozeCheckBox.isChecked()
 
     #Method to enable / disable all of the GUI elements
     def setEnabledAll(self, boolean):

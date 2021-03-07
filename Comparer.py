@@ -284,11 +284,11 @@ class Comparer(QObject):
                 #Retrieve the correct notes by their indexes
                 notes = []
                 for i in range(self.groupNum):
-                    notes.append(noteGroups[i][noteIndices[i]])
+                    notes.append(noteGroups[i][noteIndices[i]].copy())
 
                 #Check for duplicates for these notes, if present, add a replacement if the field is set and add them to the queue
                 if self.checkDuplicate(notes):
-                    self.addReplacement(notes)
+                    self.addActionInfo(notes)
                     self.queue.append(notes)
 
                 #Emit the progress signal every 1 seconds
@@ -360,7 +360,7 @@ class Comparer(QObject):
         return duplicatePresent
 
     #Method to add the tag / replacement of the group to the notes
-    def addReplacement(self, notes):
+    def addActionInfo(self, notes):
         for groupIndex in range(len(notes)):
 
             #Save the tag
@@ -377,6 +377,11 @@ class Comparer(QObject):
             else:
                 replacement = Node.getFieldValue(notes, group.replaceFieldReference)
                 if replacement != False:
+
+                    #When 'remove cloze' is checked, remove any cloze markup
+                    if self.groups[groupIndex].removeCloze:
+                        replacement = re.sub(r'{{.+?::|::.+?}}|}}', '', str(replacement))
+
                     note['replacement'] = replacement
 
     #Method to perform the set actions on the cards in the queue
@@ -422,8 +427,9 @@ class Comparer(QObject):
                         #and the compare field value is not 'False'
                         #since it is otherwise not a field that is present in the note
                         field = note['compareFields'][fieldNum - 1]
-                        if field['value'] != False and note['replacement'] != '':
-                            noteObject[field['name']] = note['replacement']
+                        replacement = note['replacement']
+                        if field['value'] != False and replacement != '':
+                            noteObject[field['name']] = replacement
                             noteObject.flush()
 
             #When the number of rows exceeds the max

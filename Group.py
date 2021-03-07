@@ -34,6 +34,7 @@ class Group:
         self.duplicateActionTag = ''
         self.duplicateActionReplacement = ''
         self.replaceFieldReference = None
+        self.removeCloze = False
         self.fields = []
 
     #Method to return the currently selected note group field info

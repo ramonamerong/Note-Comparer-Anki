@@ -86,6 +86,9 @@ class QueueDialog(QDialog):
             self.queueTable.horizontalHeader().resizeSection(1 + groupIndex*3, 105)
             self.queueTable.horizontalHeader().resizeSection(2 + groupIndex*3, 105)
 
+        #Resize the rows
+        self.queueTable.resizeRowsToContents()
+
         self.triggers = True
                 
 
