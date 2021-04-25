@@ -83,4 +83,4 @@ After comparison you can also change the actions you want to perform on each not
 </ul>
 
 ## Contact
-For (future) suggestions or bugs you can either make a issue here on github or contact me directly on discord as Ramanel#0650.
+For (future) suggestions or bugs you can either make a issue here on github or contact me via my email ramonamerong@live.nl.
